@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mentor Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="container full-width-record">
+        <!-- Admin Navbar -->
+        {% if session.get('is_admin') %}
+        <style>
+            .admin-navbar {
+                background: white;
+                padding: 15px 30px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                margin-left: -20px;
+                /* Counteract container padding if needed, or adjust container */
+                margin-right: -20px;
+                border-radius: 8px;
+            }
+
+            .admin-navbar a {
+                color: #666;
+                text-decoration: none;
+                margin-left: 20px;
+                font-weight: 500;
+            }
+
+            .admin-navbar a:hover {
+                color: var(--primary-color);
+            }
+        </style>
+        <div class="admin-navbar">
+            <h2 style="margin: 0; color: var(--primary-color);">Admin Portal</h2>
+            <div>
+                <a href="javascript:history.back()"
+                    style="border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; color: #333;">&larr; Back</a>
+                <a href="/mentor/admin/dashboard">Dashboard</a>
+                <a href="/mentor/logout">Logout</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Mentor Navbar -->
+        {% if session.get('mentor_id') and not session.get('is_admin') %}
+        <style>
+            .mentor-navbar {
+                background: white;
+                padding: 15px 30px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                margin-left: -20px;
+                margin-right: -20px;
+                border-radius: 8px;
+            }
+
+            .mentor-navbar a {
+                color: #666;
+                text-decoration: none;
+                margin-left: 20px;
+                font-weight: 500;
+            }
+
+            .mentor-navbar a:hover {
+                color: var(--primary-color);
+            }
+
+            .nav-brand {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: var(--primary-color);
+            }
+        </style>
+        <div class="mentor-navbar">
+            <div class="nav-brand">Mentor Portal</div>
+            <div>
+                <a href="/mentor/dashboard">Dashboard</a>
+                <a href="/mentor/students">Students</a>
+                <a href="/mentor/logout">Logout</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Student Navbar -->
+        {% if session.get('student_id') %}
+        <style>
+            .student-navbar {
+                background: white;
+                padding: 15px 30px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                margin-left: -20px;
+                margin-right: -20px;
+                border-radius: 8px;
+            }
+
+            .student-navbar a {
+                color: #666;
+                text-decoration: none;
+                margin-left: 20px;
+                font-weight: 500;
+            }
+
+            .student-navbar a:hover {
+                color: var(--primary-color);
+            }
+
+            .nav-brand {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: var(--primary-color);
+            }
+        </style>
+        <div class="student-navbar">
+            <div class="nav-brand">Student Portal</div>
+            <div>
+                <a href="/mentor/student/{{ session.get('student_rollno') }}">Profile</a>
+                <a href="/mentor/logout">Logout</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <h2 class="page-title">Student Details</h2>
+
+        <!-- 🎓 PROFILE HEADER CARD -->
+        <div class="profile-card">
+            <div class="profile-image-section">
+                {% if student.profile_image %}
+                <img src="{{ url_for('static', filename='images/' + student.profile_image) }}" alt="Profile Image"
+                    class="profile-img">
+                {% else %}
+                <div class="profile-placeholder">
+                    <span>No Image</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-info-section">
+                <div class="info-grid-spacious">
+                    <div class="info-item">
+                        <span class="label">Roll No</span>
+                        <span class="value">{{ student.rollno }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Course</span>
+                        <span class="value">{{ student.course }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Joining Year</span>
+                        <span class="value">{{ student.jyear }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Current Year</span>
+                        <span class="value highlight">{{ current_year }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <h3 class="section-title">Student Information</h3>
+
+        <form method="POST" class="modern-form">
+            <div class="form-grid">
+                <!-- Name -->
+                <div class="form-group-modern">
+                    <label>Student Name</label>
+                    <input type="text" name="sname" value="{{ student.sname }}" {% if session.get('is_admin')
+                        %}readonly{% endif %}>
+                </div>
+
+                <!-- Parents -->
+                <div class="form-group-modern">
+                    <label>Father Name</label>
+                    <input type="text" name="fname" value="{{ student.fname }}" {% if session.get('is_admin')
+                        %}readonly{% endif %}>
+                </div>
+                <div class="form-group-modern">
+                    <label>Mother Name</label>
+                    <input type="text" name="mname" value="{{ student.mname }}" {% if session.get('is_admin')
+                        %}readonly{% endif %}>
+                </div>
+
+                <!-- Personal -->
+                <div class="form-group-modern">
+                    <label>Date of Birth</label>
+                    <input type="date" name="dob" value="{{ student.dob }}" {% if session.get('is_admin') %}readonly{%
+                        endif %}>
+                </div>
+                <div class="form-group-modern">
+                    <label>Gender</label>
+                    <select name="gender" {% if session.get('is_admin') %}disabled{% endif %}>
+                        <option value="Male" {% if student.gender=="Male" %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if student.gender=="Female" %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <!-- Details -->
+                <div class="form-group-modern">
+                    <label>Caste</label>
+                    <input type="text" name="caste" value="{{ student.caste }}" {% if session.get('is_admin')
+                        %}readonly{% endif %}>
+                </div>
+                <div class="form-group-modern">
+                    <label>Aadhar No</label>
+                    <input type="text" name="aadharno" value="{{ student.aadharno }}" id="aadharno" {% if
+                        session.get('is_admin') %}readonly{% endif %}>
+                </div>
+
+                <!-- Contact & Academic -->
+                <div class="form-group-modern">
+                    <label>Mobile No</label>
+                    <input type="text" name="mobileno" value="{{ student.mobileno }}" {% if session.get('is_admin')
+                        %}readonly{% endif %}>
+                </div>
+                <div class="form-group-modern">
+                    <label>Current Semester</label>
+                    <input type="number" name="currsem" value="{{ student.currsem }}" {% if session.get('is_admin')
+                        %}readonly{% endif %}>
+                </div>
+
+                <div class="form-group-modern">
+                    <label>Section</label>
+                    <input type="text" name="secl" value="{{ student.secl }}" {% if session.get('is_admin') %}readonly{%
+                        endif %}>
+                </div>
+                <div class="form-group-modern">
+                    <label>Status</label>
+                    <select name="status" {% if session.get('is_admin') %}disabled{% endif %}>
+                        <option value="0" {% if student.status=='0' %}selected{% endif %}>Active</option>
+                        <option value="1" {% if student.status=='1' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            {% if not session.get('is_admin') %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Update Student Details</button>
+            </div>
+            {% endif %}
+        </form>
+
+        <script>
+            document.querySelector('.modern-form').addEventListener('submit', function (e) {
+                const sname = document.querySelector('input[name="sname"]').value;
+                const fname = document.querySelector('input[name="fname"]').value;
+                const mname = document.querySelector('input[name="mname"]').value;
+                const aadharno = document.querySelector('input[name="aadharno"]').value;
+
+                // Validate alphabets and spaces - allow empty for submission if needed, but if typing, must be valid
+                const nameRegex = /^[A-Za-z\s]*$/;
+                if (!nameRegex.test(sname)) {
+                    alert("Student Name should contain only alphabets");
+                    e.preventDefault();
+                    return;
+                }
+                if (!nameRegex.test(fname)) {
+                    alert("Father Name should contain only alphabets");
+                    e.preventDefault();
+                    return;
+                }
+                if (!nameRegex.test(mname)) {
+                    alert("Mother Name should contain only alphabets");
+                    e.preventDefault();
+                    return;
+                }
+
+                // Validate digit only
+                const aadharRegex = /^\d*$/;
+                if (!aadharRegex.test(aadharno)) {
+                    alert("Aadhar No should contain only digits");
+                    e.preventDefault();
+                    return;
+                }
+            });
+        </script>
+
+        <hr>
+
+        <h3 class="section-title">Academic Records</h3>
+
+
+        <a href="/mentor/student/{{ student.rollno }}/academics" class="link-action">
+            View Semester Marks Details
+        </a><br>
+
+        <br>
+
+        {% if session.get('mentor_id') and not session.get('is_admin') %}
+        <a href="/mentor/students" class="back-link">← Back to Student List</a>
+        {% elif session.get('is_admin') %}
+        <a href="/mentor/admin/dashboard" class="back-link">← Back to Admin Dashboard</a>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

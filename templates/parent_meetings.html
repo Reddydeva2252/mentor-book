@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Parent Meetings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+        <h2 class="page-title">Parent – Mentor Meetings</h2>
+
+        <div class="student-summary-card">
+            <p>
+                <strong>Roll No:</strong> {{ student.rollno }} <br>
+                <strong>Name:</strong> {{ student.sname }}
+            </p>
+        </div>
+
+        <hr>
+
+        <h3 class="section-title">Add New Meeting</h3>
+
+        <form method="POST" class="meeting-form">
+            <div class="form-group">
+                <label class="form-label">Semester</label><br>
+                <select name="semester" required class="form-select">
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                </select><br><br>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Date</label><br>
+                <input type="date" name="meeting_date" required class="form-input"><br><br>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Purpose</label><br>
+                <input type="text" name="purpose" required class="form-input"><br><br>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Remarks</label><br>
+                <textarea name="remarks" class="form-textarea"></textarea><br><br>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Meeting</button>
+        </form>
+
+        <hr>
+
+        <h3 class="section-title">Meeting History</h3>
+
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Semester</th>
+                    <th>Date</th>
+                    <th>Purpose</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in meetings %}
+                <tr>
+                    <td>{{ m.semester }}</td>
+                    <td>{{ m.meeting_date }}</td>
+                    <td>{{ m.purpose }}</td>
+                    <td>{{ m.remarks }}</td>
+                </tr>
+                {% endfor %}
+
+                {% if meetings|length == 0 %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No meetings recorded
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <br>
+        <a href="/mentor/student/{{ student.rollno }}/academics" class="back-link">← Back to Student</a>
+    </div>
+
+</body>
+
+</html>

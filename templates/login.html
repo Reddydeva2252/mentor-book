@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ✅ HANDLE FLASH MESSAGES AS POPUP -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+        // Simple alert as requested
+        alert("{{ messages[0] }}");
+    </script>
+    {% endif %}
+    {% endwith %}
+
+    <div class="login-container">
+        <h1 class="login-title">Login</h1>
+
+        <!-- 🔘 LOGIN TYPE BUTTONS (UI ONLY FOR NOW) -->
+        <div class="login-type-select">
+            <button type="button" class="btn btn-outline" id="btn-admin" onclick="setLoginType('admin')">Admin
+                Login</button>
+            <button type="button" class="btn btn-primary active" id="btn-mentor"
+                onclick="setLoginType('mentor')"><strong>Mentor Login</strong></button>
+            <button type="button" class="btn btn-outline" id="btn-student" onclick="setLoginType('student')">Student
+                Login</button>
+        </div>
+
+        <hr class="divider">
+
+        <!-- ✅ MUST POST TO /mentor/login -->
+        <form method="POST" action="/mentor/login" class="login-form">
+
+            <input type="hidden" name="login_type" id="login_type" value="mentor">
+
+            <div class="form-group">
+                <label class="form-label">Username</label><br>
+                <input type="text" name="username" required class="form-control"><br><br>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="login-password" required class="form-control"
+                        style="padding-right: 40px;">
+                    <span class="password-toggle-icon" onclick="togglePassword('login-password', this)">👁️</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-block btn-primary">Login</button>
+            <div style="text-align: center; margin-top: 10px;">
+                <a href="#" id="forgot-password-link"
+                    style="color: var(--primary-color); text-decoration: none; font-size: 0.9em;">Forgot Password?</a>
+            </div>
+        </form>
+
+        <!-- 🔹 FORGOT PASSWORD SECTION (Hidden initially) -->
+        <div id="forgot-password-section"
+            style="display: none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <h3 class="login-title" style="font-size: 1.2rem;">Reset Password</h3>
+
+            <!-- STEP 1: SEND OTP -->
+            <div id="step-1">
+                <div class="form-group">
+                    <label class="form-label">Email or Mobile</label>
+                    <input type="text" id="reset-contact" class="form-control"
+                        placeholder="Enter registered email or mobile">
+                </div>
+                <button type="button" id="btn-send-otp" class="btn btn-block btn-outline">Send OTP</button>
+            </div>
+
+            <!-- STEP 2: VERIFY OTP -->
+            <div id="step-2" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Enter OTP</label>
+                    <input type="text" id="reset-otp" class="form-control" placeholder="Enter 6-digit OTP">
+                    <small style="color: #666;">(Check server console for OTP)</small>
+                </div>
+                <button type="button" id="btn-verify-otp" class="btn btn-block btn-outline">Verify OTP</button>
+            </div>
+
+            <!-- STEP 3: NEW PASSWORD -->
+            <div id="step-3" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="new-password" class="form-control" style="padding-right: 40px;">
+                        <span class="password-toggle-icon" onclick="togglePassword('new-password', this)">👁️</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirm-password" class="form-control" style="padding-right: 40px;">
+                        <span class="password-toggle-icon" onclick="togglePassword('confirm-password', this)">👁️</span>
+                    </div>
+                </div>
+                <button type="button" id="btn-reset-password" class="btn btn-block btn-primary">Change Password</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <a href="#" id="back-to-login" style="color: #666; font-size: 0.9em;">Back to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Password Visibility Function
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                // Change icon to 'slashed eye' (using simple text rep or emoji for now)
+                icon.innerText = "🔒"; // Or sticking with eye, maybe "👀" or "Hide"
+                icon.title = "Hide Password";
+            } else {
+                input.type = "password";
+                icon.innerText = "👁️";
+                icon.title = "Show Password";
+            }
+        }
+
+        function setLoginType(type) {
+            document.getElementById('login_type').value = type;
+
+            const btnAdmin = document.getElementById('btn-admin');
+            const btnMentor = document.getElementById('btn-mentor');
+            const btnStudent = document.getElementById('btn-student');
+
+            // Reset all
+            btnAdmin.classList.add('btn-outline');
+            btnAdmin.classList.remove('btn-primary', 'active');
+            btnMentor.classList.add('btn-outline');
+            btnMentor.classList.remove('btn-primary', 'active');
+            btnStudent.classList.add('btn-outline');
+            btnStudent.classList.remove('btn-primary', 'active');
+
+            btnAdmin.innerHTML = "Admin Login";
+            btnMentor.innerHTML = "Mentor Login";
+            btnStudent.innerHTML = "Student Login";
+
+            if (type === 'admin') {
+                btnAdmin.classList.add('btn-primary', 'active');
+                btnAdmin.classList.remove('btn-outline');
+                btnAdmin.innerHTML = "<strong>Admin Login</strong>";
+            } else if (type === 'student') {
+                btnStudent.classList.add('btn-primary', 'active');
+                btnStudent.classList.remove('btn-outline');
+                btnStudent.innerHTML = "<strong>Student Login</strong>";
+            } else {
+                btnMentor.classList.add('btn-primary', 'active');
+                btnMentor.classList.remove('btn-outline');
+                btnMentor.innerHTML = "<strong>Mentor Login</strong>";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.querySelector('.login-form');
+            const forgotSection = document.getElementById('forgot-password-section');
+            const forgotLink = document.getElementById('forgot-password-link');
+            const backLink = document.getElementById('back-to-login');
+
+            // Toggle Views
+            forgotLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                forgotSection.style.display = 'block';
+            });
+
+            backLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                forgotSection.style.display = 'none';
+                loginForm.style.display = 'block';
+                resetForgotFlow();
+            });
+
+            function resetForgotFlow() {
+                document.getElementById('step-1').style.display = 'block';
+                document.getElementById('step-2').style.display = 'none';
+                document.getElementById('step-3').style.display = 'none';
+                document.getElementById('reset-contact').value = '';
+                document.getElementById('reset-otp').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            }
+
+            // --- API ACTIONS ---
+
+            // 1. Send OTP
+            document.getElementById('btn-send-otp').addEventListener('click', async () => {
+                const contact = document.getElementById('reset-contact').value;
+                if (!contact) return alert("Please enter email or mobile");
+
+                const btn = document.getElementById('btn-send-otp');
+                btn.disabled = true;
+                btn.innerText = "Sending...";
+
+                try {
+                    const res = await fetch('/mentor/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contact })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        alert(data.message);
+                        document.getElementById('step-1').style.display = 'none';
+                        document.getElementById('step-2').style.display = 'block';
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Error sending OTP");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Send OTP";
+                }
+            });
+
+            // 2. Verify OTP
+            document.getElementById('btn-verify-otp').addEventListener('click', async () => {
+                const otp = document.getElementById('reset-otp').value;
+                if (!otp) return alert("Please enter OTP");
+
+                try {
+                    const res = await fetch('/mentor/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ otp })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        document.getElementById('step-2').style.display = 'none';
+                        document.getElementById('step-3').style.display = 'block';
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Error verification failed");
+                }
+            });
+
+            // 3. Reset Password
+            document.getElementById('btn-reset-password').addEventListener('click', async () => {
+                const p1 = document.getElementById('new-password').value;
+                const p2 = document.getElementById('confirm-password').value;
+
+                if (!p1 || !p2) return alert("Please enter both passwords");
+                if (p1 !== p2) return alert("Passwords do not match");
+
+                try {
+                    const res = await fetch('/mentor/reset-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: p1 })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        alert(data.message);
+                        // Redirect or go back to login
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Error resetting password");
+                }
+            });
+        });
+    </script>
+
+</html>

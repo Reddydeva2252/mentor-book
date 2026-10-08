@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        /* Admin Navbar Style */
+        .admin-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .admin-navbar a {
+            color: #666;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .admin-navbar a:hover {
+            color: var(--primary-color);
+        }
+
+        .admin-search-container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-search-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .admin-search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .admin-search-btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .admin-search-btn:hover {
+            background-color: var(--primary-hover-color);
+        }
+
+        /* Result Card Styles */
+        .student-result-card {
+            width: 85%;
+            margin: 10px auto 50px auto;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .student-result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .student-result-img {
+            width: 160px;
+            height: 160px;
+
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            padding: 4px;
+            background: white;
+            margin: 0 auto 25px auto;
+            margin-left: 500px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-result-placeholder {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 50%;
+            margin: 0 auto 25px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #888;
+            border: 4px solid var(--primary-color);
+            padding: 4px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+
+        .student-result-name {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .student-result-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .student-result-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .student-result-detail-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .student-result-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .student-result-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .view-full-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover-color) 100%);
+            color: rgb(20, 19, 19);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .view-full-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            color: black;
+        }
+
+        /* Programs Grid */
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px auto;
+            max-width: 1000px;
+        }
+
+        .program-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            color: inherit;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+        }
+
+        .program-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .program-card h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Admin Navbar -->
+    <div class="admin-navbar">
+        <h2 style="margin: 0; color: var(--primary-color);">Admin Portal</h2>
+        <div>
+            <a href="javascript:history.back()"
+                style="border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; color: #333;">&larr; Back</a>
+            <a href="/mentor/admin/dashboard">Dashboard</a>
+            <a href="/mentor/logout">Logout</a>
+        </div>
+    </div>
+
+    <div>
+        <!-- ERROR FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div
+            style="margin: 20px auto; max-width: 600px; padding: 15px; background: #ffebee; color: #c62828; border-radius: 8px; text-align: center;">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="admin-search-container">
+            <h1 style="margin-bottom: 30px;">Student Search</h1>
+
+            <form action="/mentor/admin/search" method="POST">
+                <input type="text" name="rollno" class="admin-search-input"
+                    placeholder="Enter Student Roll Number (e.g., 2451-22-733-001)" value="{{ rollno or '' }}" required
+                    autofocus>
+                <button type="submit" class="admin-search-btn">Search Student</button>
+            </form>
+        </div>
+
+
+        {% if programs %}
+        <div class="programs-grid">
+            <h2 style="text-align: center; color: var(--primary-color); margin-top: 40px;">Select Program</h2>
+            {% for program in programs %}
+            <a href="/mentor/admin/program/{{ program.pcode }}" class="program-card">
+                <h3>{{ program.pshort }}</h3>
+            </a>
+            {% endfor %}
+            <a href="/mentor/admin/overall" class="program-card" style="border: 2px solid var(--primary-color); background: #f0f8ff;">
+                <h3 style="color: var(--primary-color);">Overall</h3>
+            </a>
+        </div>
+        {% endif %}
+
+        {% if student_data %}
+        <div class="student-result-card">
+            {% if student_data.profile_image %}
+            <img src="{{ url_for('static', filename='images/' + student_data.profile_image) }}" alt="Profile Image"
+                class="student-result-img">
+            {% else %}
+            <div class="student-result-placeholder">
+                <span>{{ student_data.sname[0] if student_data.sname else 'U' }}</span>
+            </div>
+            {% endif %}
+
+            <h2 class="student-result-name">{{
+                student_data.sname }}</h2>
+
+            <div class="student-result-details">
+                <div class="student-result-detail-item">
+                    <span class="student-result-label">Roll Number</span>
+                    <span class="student-result-value">{{ student_data.rollno }}</span>
+                </div>
+                <div class="student-result-detail-item">
+                    <span class="student-result-label">Program / Course</span>
+                    <span class="student-result-value">{{ student_data.pshort or 'Not Assigned' }}</span>
+                </div>
+                <div class="student-result-detail-item">
+                    <span class="student-result-label">Father's Name</span>
+                    <span class="student-result-value">{{ student_data.fname or 'Not Assigned' }}</span>
+                </div>
+                <div class="student-result-detail-item">
+                    <span class="student-result-label">Mother's Name</span>
+                    <span class="student-result-value">{{ student_data.mname or 'Not Assigned' }}</span>
+                </div>
+                <div class="student-result-detail-item">
+                    <span class="student-result-label">Mobile Number</span>
+                    <span class="student-result-value">{{ student_data.mobileno or 'Not Assigned' }}</span>
+                </div>
+            </div>
+
+            <!-- Backlog Details Section -->
+            <div class="student-result-details" style="margin-top: 20px;">
+                <h3
+                    style="color: var(--primary-color); margin-top: 0; margin-bottom: 15px; text-align: left; font-size: 1.3rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; display: inline-block;">
+                    Backlog Details</h3>
+
+                {% if total_backlogs == 0 %}
+                <div
+                    style="text-align: left; font-weight: 600; color: #2e7d32; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                    🎉 No backlogs
+                </div>
+                {% else %}
+                <div
+                    style="text-align: left; font-weight: 700; color: #c62828; margin-bottom: 15px; font-size: 1.1rem;">
+                    Total Backlogs: {{ total_backlogs }}
+                </div>
+                <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px;">
+                    {% for sem, subjects in backlogs_by_sem.items() %}
+                    <div
+                        style="width: 45%;padding: 12px; background: #fff5f5; border-left: 4px solid #ef5350; border-radius: 6px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="font-weight: 700; color: #d32f2f; margin-bottom: 5px;">
+                            Semester {{ sem }} <span
+                                style="font-weight: 500; font-size: 0.9rem; color: #666; margin-left: 8px;">({{ subjects
+                                | length }} backlog{{ 's' if subjects|length > 1 else '' }})</span>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="background: #ef5350; color: white;">
+                                    <th style="padding: 8px; border: 1px solid #ef9a9a; text-align: left;">Course Code
+                                    </th>
+                                    <th style="padding: 8px; border: 1px solid #ef9a9a; text-align: left;">Subject Name
+                                    </th>
+                                    <th style="padding: 8px; border: 1px solid #ef9a9a; text-align: center;">Total Marks
+                                    </th>
+                                    <th style="padding: 8px; border: 1px solid #ef9a9a; text-align: center;">Internal
+                                    </th>
+                                    <th style="padding: 8px; border: 1px solid #ef9a9a; text-align: center;">Semend
+                                    </th>
+                                    <th style="padding: 8px; border: 1px solid #ef9a9a; text-align: center;">Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subject in subjects %}
+                                <tr style="background: white;">
+                                    <td style="padding: 8px; border: 1px solid #ffcdd2; color: #444;">{{ subject.scode
+                                        }}</td>
+                                    <td style="padding: 8px; border: 1px solid #ffcdd2; color: #444;">{{ subject.stitle
+                                        }}</td>
+                                    <td
+                                        style="padding: 8px; border: 1px solid #ffcdd2; text-align: center; color: #d32f2f; font-weight: bold;">
+                                        {{ subject.istot if subject.istot is not none else '—' }}</td>
+                                    <td
+                                        style="padding: 8px; border: 1px solid #ffcdd2; text-align: center; color: #d32f2f; font-weight: bold;">
+                                        {{ subject.ciapf if subject.ciapf is not none else '—' }}</td>
+                                    <td
+                                        style="padding: 8px; border: 1px solid #ffcdd2; text-align: center; color: #d32f2f; font-weight: bold;">
+                                        {{ subject.seepf if subject.seepf is not none else '—' }}</td>
+                                    <td
+                                        style="padding: 8px; border: 1px solid #ffcdd2; text-align: center; color: #d32f2f; font-weight: bold;">
+                                        {{ subject.istotpf if subject.istotpf is not none else '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <a href="/mentor/student/{{ student_data.rollno }}" class="view-full-btn">View Full Profile</a>
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

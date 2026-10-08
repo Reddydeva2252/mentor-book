@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Mentor Navbar -->
+        <style>
+            .mentor-navbar {
+                background: white;
+                padding: 15px 30px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                border-radius: 8px;
+            }
+
+            .mentor-navbar a {
+                color: #666;
+                text-decoration: none;
+                margin-left: 20px;
+                font-weight: 500;
+            }
+
+            .mentor-navbar a:hover {
+                color: var(--primary-color);
+            }
+
+            .nav-brand {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: var(--primary-color);
+            }
+        </style>
+        <div class="mentor-navbar">
+            <div class="nav-brand">Mentor Portal</div>
+            <div>
+                <a href="/mentor/dashboard">Dashboard</a>
+                <a href="/mentor/students">Students</a>
+                <a href="/mentor/logout">Logout</a>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="page-title" style="margin-bottom: 0; border: none;">Student List – Degree (AI Department)</h2>
+
+            <form method="GET" action="/mentor/students" style="display: flex; gap: 10px;">
+                <input type="text" name="search" placeholder="Search Roll No or Name..."
+                    value="{{ request.args.get('search', '') }}"
+                    style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 30px; width: 250px; outline: none;">
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                {% if request.args.get('search') %}
+                <a href="/mentor/students" class="btn btn-secondary btn-sm"
+                    style="display:flex; align-items:center;">✖</a>
+                {% endif %}
+            </form>
+        </div>
+        <hr style="margin-top: 0;">
+
+        <table class="student-table">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Course</th>
+                    <th>Current Year</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>
+                        <a href="/mentor/student/{{ s.roll_no }}" class="student-link">
+                            {{ s.roll_no }}
+                        </a>
+                    </td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.course }}</td>
+                    <td><strong>{{ s.current_year }}</strong></td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if students|length == 0 %}
+        <p class="empty-state">No students found.</p>
+        {% endif %}
+
+        <br>
+        <br>
+        <!-- Back link removed as Navbar handles it -->
+    </div>
+
+</body>
+
+</html>
